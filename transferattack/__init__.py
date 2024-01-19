@@ -30,6 +30,8 @@ from .input_transformation.maskblock import MaskBlock
 from .input_transformation.sia import SIA
 from .input_transformation.stm import STM
 from .input_transformation.bsr import BSR
+# from .input_transformation.lpm.lpm import LPM
+from .input_transformation.lpm import LPM
 
 
 from .advanced_objective.tap import TAP
@@ -92,6 +94,7 @@ attack_zoo = {
             'sia': SIA,
             'stm': STM,
             'bsr': BSR,
+            'lpm': LPM,
 
             # advanced_objective
 
