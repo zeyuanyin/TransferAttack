@@ -1,0 +1,7 @@
+results/
+__pycache__/
+adv_data/
+
+*.sh
+*.ipynb
+*.txt
