@@ -107,10 +107,10 @@ def main():
         # reverse_sampler = ReverseSampler(dataset)
     else:
         reverse_sampler = None
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batchsize, shuffle=False, num_workers=4, sampler=reverse_sampler,collate_fn=custom_collate)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batchsize, shuffle=False, num_workers=1, sampler=reverse_sampler,collate_fn=custom_collate)
 
 
-    assert args.batchsize == 1
+    # assert args.batchsize == 1
 
     not_correct_list_name = []
     not_correct_list_label = []

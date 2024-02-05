@@ -3,5 +3,5 @@ __pycache__/
 adv_data/
 
 *.sh
-*.ipynb
+# *.ipynb
 *.txt
