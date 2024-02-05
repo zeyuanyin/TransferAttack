@@ -108,10 +108,18 @@ class AdvDataset(torch.utils.data.Dataset):
 
         filepath = os.path.join(self.data_dir, filename)
         image = Image.open(filepath)
-        image = image.resize((img_height, img_width)).convert('RGB')
+
+        transform = transforms.Compose([
+            transforms.Resize((img_height, img_width)),
+            transforms.ToTensor(),
+        ])
+
+        # image = image.resize((img_height, img_width)).convert('RGB')
         # Images for inception classifier are normalized to be in [-1, 1] interval.
-        image = np.array(image).astype(np.float32)/255
-        image = torch.from_numpy(image).permute(2, 0, 1)
+        # image = np.array(image).astype(np.float32)/255
+        # image = torch.from_numpy(image).permute(2, 0, 1)
+        image = transform(image)
+
         label = self.f2l[filename]
 
         return image, label, filename
