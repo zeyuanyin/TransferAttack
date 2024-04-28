@@ -15,7 +15,7 @@ class Attack(object):
 
         Arguments:
             attack (str): the name of attack.
-            model_name (str): the name of surrogate model for attack.
+            model_name (str/list): the name of surrogate model for attack.
             epsilon (float): the perturbation budget.
             targeted (bool): targeted/untargeted attack.
             random_start (bool): whether using random initialization for delta.
@@ -26,6 +26,7 @@ class Attack(object):
         if norm not in ['l2', 'linfty']:
             raise Exception("Unsupported norm {}".format(norm))
         self.attack = attack
+        self.model_name = model_name
         self.model = self.load_model(model_name)
         self.epsilon = epsilon
         self.targeted = targeted
@@ -60,7 +61,10 @@ class Attack(object):
             return wrap_model(model.eval().cuda())
 
         if isinstance(model_name, list):
-            return EnsembleModel([load_single_model(name) for name in model_name])
+            if hasattr(self, 'ensemble_mode'):
+                return EnsembleModel([load_single_model(name) for name in model_name], mode=self.ensemble_mode)
+            else:
+                return EnsembleModel([load_single_model(name) for name in model_name])
         else:
             return load_single_model(model_name)
 
