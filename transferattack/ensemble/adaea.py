@@ -23,13 +23,14 @@ class AdaEA(MIFGSM):
         device (torch.device): the device for data. If it is None, the device would be same as model
 
     Official Arguments:
-        epsilon=16/255, alpha=epsilon/epoch=1.6/255, epoch=10, decay=1.0, mlp_gamma=0.25 (we follow mlp_gamma=0.5 in official code)
+        epsilon=8/255, alpha=2/255, epoch=20, decay=0.9 (Instead of using the official setting, we keep the same hyperparameters as svre)
+        adaea_beta=10, threshold=-0.3 in the paper but threshold=0 in the official code
 
     Example Script:
         python main.py --attack adaea --input_dir ./path/to/data --output_dir adv_data/adaea/ensemble --model='resnet18,resnet101,resnext50_32x4d,densenet121'
     """
 
-    def __init__(self, epoch=20, epsilon=8 / 255, alpha=2 / 255, decay=0.9, **kwargs):
+    def __init__(self, **kwargs):
         kwargs["attack"] = "AdaEA"
         self.ensemble_mode = "ind"
 
@@ -37,10 +38,14 @@ class AdaEA(MIFGSM):
         self.adaea_beta = 10
         self.threshold = 0
 
+        # kwargs["epsilon"] = 8 / 255
+        # kwargs["alpha"] = 2 / 255
+        # kwargs["epoch"] = 20
+        # kwargs["decay"] = 0.9
+
         super().__init__(**kwargs)
         assert isinstance(self.model, EnsembleModel)
         self.model: EnsembleModel = self.model  # for type hinting
-        # self.model = torch.nn.DataParallel(self.model)
 
     def forward(self, data, label, **kwargs):
         """
@@ -71,20 +76,22 @@ class AdaEA(MIFGSM):
             weight = self.agm(data, delta_list, label)
 
             # DRF
-            cos_res = self.drf(grad_list, data_size=data.shape)
-            cos_res[cos_res >= self.threshold] = 1.0
-            cos_res[cos_res < self.threshold] = 0.0
+            # cos_res = self.drf(grad_list, data_size=data.shape)
+            # cos_res[cos_res >= self.threshold] = 1.0
+            # cos_res[cos_res < self.threshold] = 0.0
+
+            # self.threshold =0.05
+            # print("=>min", torch.min(cos_res))
+            # print("=>", (torch.sum(cos_res < self.threshold)/torch.numel(cos_res)).item(), '%')
+            # exit()
 
             logit_ens = logits * weight.view(self.model.num_models, 1, 1)
             logit_ens = logit_ens.sum(dim=0)
             loss_ens = self.get_loss(logit_ens, label)
-            grad_ens = self.get_grad(loss_ens, delta) * cos_res
+            grad_ens = self.get_grad(loss_ens, delta) #* cos_res
             momentum = self.get_momentum(grad_ens, momentum)
 
             delta = self.update_delta(delta, data, momentum, self.alpha)
-
-            # print('ok')
-            # exit()
 
         return delta.detach()
 
@@ -123,13 +130,13 @@ class AdaEA(MIFGSM):
             size=(self.model.num_models, self.model.num_models, data_size[0], data_size[-2], data_size[-1]),
             dtype=torch.float,
             device=self.device,
-        )  # [#models, #models, BS, W, H]
+        )  # [#models, #models, BS, H, W]
 
         reduce_map_result = torch.zeros(
             size=(self.model.num_models, data_size[0], data_size[-2], data_size[-1]),
             dtype=torch.float,
             device=self.device,
-        )  # [#models, BS, W, H]
+        )  # [#models, BS, H, W]
 
         for i in range(self.model.num_models):
             for j in range(self.model.num_models):
