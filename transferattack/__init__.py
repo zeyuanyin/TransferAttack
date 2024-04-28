@@ -74,6 +74,7 @@ from .ensemble.ens import ENS
 from .ensemble.svre import SVRE
 from .ensemble.lgv import LGV
 from .ensemble.mba import MBA
+from .ensemble.adaea import AdaEA
 
 attack_zoo = {
             # gredient
@@ -155,6 +156,7 @@ attack_zoo = {
             'svre': SVRE,
             'lgv': LGV,
             'mba': MBA,
+            'adaea': AdaEA,
         }
 
 __version__ = '1.0.0'
