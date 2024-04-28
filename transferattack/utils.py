@@ -45,6 +45,7 @@ def wrap_model(model):
         mean = [0.485, 0.456, 0.406]
         std = [0.229, 0.224, 0.225]
     normalize = transforms.Normalize(mean, std)
+    model = torch.nn.DataParallel(model)
     return torch.nn.Sequential(normalize, model)
 
 
@@ -64,8 +65,6 @@ class EnsembleModel(torch.nn.Module):
         for model in models:
             model.to(self.device)
         self.models = models
-        self.softmax = torch.nn.Softmax(dim=1)
-        self.type_name = 'ensemble'
         self.num_models = len(models)
         self.mode = mode
 
