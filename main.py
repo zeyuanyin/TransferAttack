@@ -22,12 +22,14 @@ def get_parser():
     parser.add_argument('--input_dir', default='./data', type=str, help='the path for custom benign images, default: untargeted attack data')
     parser.add_argument('--output_dir', default='./results', type=str, help='the path to store the adversarial patches')
     parser.add_argument('--targeted', action='store_true', help='targeted attack')
+    parser.add_argument('--random_seed', default=0, type=int)
     parser.add_argument('--GPU_ID', default='0', type=str)
     return parser.parse_args()
 
 
 def main():
     args = get_parser()
+    set_random_seed(args.random_seed)
     os.environ["CUDA_VISIBLE_DEVICES"] = args.GPU_ID
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)

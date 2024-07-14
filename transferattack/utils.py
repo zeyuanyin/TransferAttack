@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import timm
 import os
+import random
 
 img_height, img_width = 224, 224
 img_max, img_min = 1., 0
@@ -125,6 +126,17 @@ class AdvDataset(torch.utils.data.Dataset):
             f2l = {dev.iloc[i]['filename']: dev.iloc[i]['label']
                    for i in range(len(dev))}
         return f2l
+
+
+def set_random_seed(seed=0):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 if __name__ == '__main__':
